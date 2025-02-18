@@ -31,3 +31,12 @@ def tareaEsp(id: int):
     raise HTTPException(status_code=404, detail="Tarea no encontrada")
 
 
+#Crear una nueva tarea
+@app.post("/tareaNueva", tags=["Agregar Tarea Nueva"])
+def crear_tarea(nueva_tarea: dict):
+    for tarea in tareas:
+        if tarea["id"] == nueva_tarea["id"]:
+            raise HTTPException(status_code=400, detail="ID ya existe")
+    
+    tareas.append(nueva_tarea)
+    return {"mensaje": "Tarea creada correctamente", "tarea": nueva_tarea}
