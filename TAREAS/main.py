@@ -43,10 +43,20 @@ def crear_tarea(nueva_tarea: dict):
 
 
 #Actualizar una tarea existente
-@app.put("/tareas/{id}", tags=["Modificar Tarea Existente"])
+@app.put("/tareaActualizada/{id}", tags=["Modificar Tarea Existente"])
 def actualizar_tarea(id: int, tarea_actualizada: dict):
     for index, tarea in enumerate(tareas):
         if tarea["id"] == id:
             tareas[index].update(tarea_actualizada)
             return tareas[index]
+    raise HTTPException(status_code=404, detail="Tarea no encontrada")
+
+#Eliminar una tarea
+@app.delete("/tareaEliminada/{id}", tags=["Eliminar Tareas"])
+def eliminarTarea(id: int):
+    for index, tarea in enumerate(tareas):
+        if tarea["id"] == id:
+            del tareas[index]
+            return {"mensaje": "Tarea eliminada correctamente"}
+    
     raise HTTPException(status_code=404, detail="Tarea no encontrada")
