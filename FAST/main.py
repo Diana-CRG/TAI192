@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException #pocesamiento de respuestas
-from typing import Optional
+from typing import Optional, List
+from pydantic import BaseModel
 
 app= FastAPI(
     title='Mi primer API S192',
@@ -7,12 +8,19 @@ app= FastAPI(
     version='1.0.1'
 )
 
+#Modelo de validaciones
+class modelusuario(BaseModel):
+    id:int
+    nombre:str
+    edad:int
+    correo:str
+
 #diccionario o lsita de objetos
 usuarios=[
-    {"id":1, "nombre":"Diana", "edad":23},
-    {"id":2, "nombre":"Juan", "edad":20},
-    {"id":3, "nombre":"Manuel", "edad":32},
-    {"id":4, "nombre":"Valeria", "edad":30}
+    {"id":1, "nombre":"Diana", "edad":23, "correo":"diana123@gmail.com"},
+    {"id":2, "nombre":"Juan", "edad":20,"correo":"juanrd4@gmail.com"},
+    {"id":3, "nombre":"Manuel", "edad":32,"correo":"manu567@gmail.com"},
+    {"id":4, "nombre":"Valeria", "edad":30,"correo":"valejim34@gmail.com"}
 ]
 #Endpoint home
 
@@ -21,7 +29,7 @@ def home():
     return{'Hello':'World FastAPI'}
 
 #Endpoint CONSULTA TODOS
-@app.get('/todosusuarios', tags=['Operaciones CRUD'])
+@app.get('/todosusuarios', response_model=List[modelusuario], tags=['Operaciones CRUD'])
 def leerUsuarios():
     return{'Los usuarios registrados son':usuarios}
 
