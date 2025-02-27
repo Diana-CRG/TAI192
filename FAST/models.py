@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 
 #Modelo de validaciones
 class modelusuario(BaseModel):
