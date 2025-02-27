@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field, EmailStr, field_validator
 
 #Modelo de validaciones
 class modelusuario(BaseModel):
@@ -14,3 +14,10 @@ class modelusuario(BaseModel):
         if not value.endswith(dominio_permitido):
             raise ValueError(f"El correo debe pertenecer al dominio {dominio_permitido}")
         return value
+    
+
+#creacion de modelo
+class modeloAuth(BaseModel):
+    email: EmailStr = Field(..., description="Correo valido", example="correo@example.com")
+    passw: str = Field(..., min_lenght=8, strip_whitespace=True, description="Contraseña con minimo 8 caracteres")
+        

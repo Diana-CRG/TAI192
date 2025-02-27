@@ -1,6 +1,8 @@
 from fastapi import FastAPI, HTTPException #pocesamiento de respuestas
+from fastapi.responses import JSONResponse
 from typing import Optional, List
-from models import modelusuario
+from modelsPydantic import modelusuario, modeloAuth
+from genToken import createToken
 
 app= FastAPI(
     title='Mi primer API S192',
@@ -22,6 +24,21 @@ usuarios=[
 @app.get('/', tags=['Hola Mundo'])
 def home():
     return{'Hello':'World FastAPI'}
+
+
+@app.post('/Auth', tags=['Autentificación'])
+def login(autorizacion:modeloAuth):
+    if autorizacion.email == 'diana@example.com' and autorizacion.passw =='12345':
+        token:str = createToken(autorizacion.model_dump())
+        print(token)
+        return JSONResponse(token)
+    else:
+        return {'Aviso':"Usuario sin autentificacion"}
+
+
+
+
+
 
 #Endpoint CONSULTA TODOS
 @app.get('/todosusuarios', response_model=List[modelusuario], tags=['Operaciones CRUD'])
