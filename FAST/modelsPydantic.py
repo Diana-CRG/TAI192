@@ -7,7 +7,7 @@ class modelusuario(BaseModel):
     edad:int = Field(..., ge=18, le=100, description="Debe ser un número entre 18 y 100")
     correo: EmailStr = Field(..., description="Debe ser un correo válido")
 
-    @field_validator("correo")
+    @field_validator("email")
     @classmethod
     def validar_dominio_correo(cls, value):
         dominio_permitido = "@solidareco.com.mx"
