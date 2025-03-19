@@ -5,21 +5,19 @@ from modelsPydantic import modelusuario, modeloAuth
 from genToken import createToken
 from middleware import BearerJWT
 
+from DB.conexion import Session, engine, Base
+from models.modelsDB import User
+
 app= FastAPI(
     title='Mi primer API S192',
     description='Diana Ruiz',
     version='1.0.1'
 )
 
+Base.metadata.create_all(bind=engine)
 
 
-#diccionario o lsita de objetos
-usuarios=[
-    {"id":1, "nombre":"Diana", "edad":23, "correo":"diana123@gmail.com"},
-    {"id":2, "nombre":"Juan", "edad":20,"correo":"juanrd4@gmail.com"},
-    {"id":3, "nombre":"Manuel", "edad":32,"correo":"manu567@gmail.com"},
-    {"id":4, "nombre":"Valeria", "edad":30,"correo":"valejim34@gmail.com"}
-]
+
 #Endpoint home
 
 @app.get('/', tags=['Hola Mundo'])
@@ -28,13 +26,13 @@ def home():
 
 
 @app.post('/Auth', tags=['Autentificación'])
-def login(autorizacion:modeloAuth):
-    if autorizacion.email == 'diana@example.com' and autorizacion.passw =='12345':
-        token:str = createToken(autorizacion.model_dump())
-        print(token)
-        return JSONResponse(token)
+def login(autorizacion: modeloAuth):
+    if autorizacion.email == 'diana@example.com' and autorizacion.passw == '12345678':  # Mínimo 8 caracteres
+        token: str = createToken(autorizacion.model_dump())
+        return JSONResponse(content={"token": token})
     else:
-        return {'Aviso':"Usuario sin autentificacion"}
+        raise HTTPException(status_code=401, detail="Usuario sin autenticación")
+
 
 
 
@@ -54,13 +52,12 @@ def agregarUsuarios(usuario:modelusuario):
 
     return usuario
 
-#Endpoint Actualizar
 @app.put('/usuarios/{id}', response_model=modelusuario, tags=['Operaciones CRUD'])
-def actualizarUsuarios(id:int, usuarioActualizado:modelusuario):
+def actualizarUsuarios(id: int, usuarioActualizado: modelusuario):
     for index, usr in enumerate(usuarios):
         if usr["id"] == id:
-           usuarios[index]=usuarioActualizado.model_dump()
-           return usuarios[index]
+            usuarios[index] = usuarioActualizado
+            return usuarios[index]
     raise HTTPException(status_code=400, detail="El usuario no existe")
 
 
