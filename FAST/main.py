@@ -8,6 +8,8 @@ from middleware import BearerJWT
 from DB.conexion import Session, engine, Base
 from models.modelsDB import User
 
+from fastapi.encoders import jsonable_encoder
+
 app= FastAPI(
     title='Mi primer API S192',
     description='Diana Ruiz',
@@ -38,19 +40,68 @@ def login(autorizacion: modeloAuth):
 
 
 #Endpoint CONSULTA TODOS
-@app.get('/todosusuarios', dependencies=[Depends(BearerJWT())], response_model=List[modelusuario], tags=['Operaciones CRUD'])
+@app.get('/todosusuarios', tags=['Operaciones CRUD'])
 def leerUsuarios():
-    return usuarios
+    db=Session()
+    try:
+        consulta=db.query(User).all()
+        return JSONResponse(content= jsonable_encoder(consulta))
+    
+    except Exception as e:
+         return JSONResponse(status_code=500,
+                            content={"message":"Error al consultar",
+                                     "Excepción":str(e) })
+
+    finally:
+        db.close()
+
+
+
+#Endpoint buscar por id
+@app.get('/usuario/{id}', tags=['Operaciones CRUD 2'])
+def buscarUno(id:int):
+    db=Session()
+    try:
+        consultauno=db.query(User).filter(User.id == id).first()
+        if not consultauno:
+
+           return JSONResponse(status_code=404, content= {"Mensaje":"Usuario no encontrado"})
+        
+        return JSONResponse(content= jsonable_encoder(consultauno))
+    
+    except Exception as e:
+         return JSONResponse(status_code=500,
+                            content={"message":"Error al consultar",
+                                     "Excepción":str(e) })
+
+    finally:
+        db.close()
+
+
 
 #Endpoint Agregar Nuevos
 @app.post('/usuario/', response_model=modelusuario,tags=['Operaciones CRUD'])
 def agregarUsuarios(usuario:modelusuario):
-    for usr in usuarios:
-        if usr["id"] == usuario.id:
-            raise HTTPException(status_code=400, detail="id ya existe")
-    usuarios.append(usuario)
+   db = Session()
+   try:
+       db.add(User(**usuario.model_dump()))
+       db.commit()
+       return JSONResponse(status_code=201,
+                            content={"message":"Usuario Guardado",
+                                     "usuario":usuario.model_dump() })
+   except Exception as e:
+       db.rollback()
+       return JSONResponse(status_code=500,
+                            content={"message":"Error al guardar Usuario",
+                                     "Excepción":str(e) })
+   
+   finally:
+       db.close()
 
-    return usuario
+
+
+
+
 
 @app.put('/usuarios/{id}', response_model=modelusuario, tags=['Operaciones CRUD'])
 def actualizarUsuarios(id: int, usuarioActualizado: modelusuario):
