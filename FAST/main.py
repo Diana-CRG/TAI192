@@ -40,7 +40,7 @@ def login(autorizacion: modeloAuth):
 
 
 #Endpoint CONSULTA TODOS
-@app.get('/todosusuarios', tags=['Operaciones CRUD'])
+@app.get('/todosusuarios', tags=['Operaciones CRUD 2'])
 def leerUsuarios():
     db=Session()
     try:
@@ -78,6 +78,55 @@ def buscarUno(id:int):
         db.close()
 
 
+# Endpoint para actualizar usuario
+@app.put('/usuario/{id}', tags=['Operaciones CRUD 2'])
+def actualizar_usuario(id: int, usuario_actualizado: modelusuario):
+    db = Session()
+    try:
+        usuario = db.query(User).filter(User.id == id).first()
+        if not usuario:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+        usuario.name = usuario_actualizado.name
+        usuario.age = usuario_actualizado.age
+        usuario.email = usuario_actualizado.email
+        
+        db.commit()
+        return JSONResponse(status_code=200, content={"message": "Usuario actualizado", "usuario": jsonable_encoder(usuario)})
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail={"message": "Error al actualizar usuario", "Excepción": str(e)})
+    finally:
+        db.close()
+
+# Endpoint para eliminar usuario
+@app.delete('/usuario/{id}', tags=['Operaciones CRUD 2'])
+def eliminar_usuario(id: int):
+    db = Session()
+    try:
+        usuario = db.query(User).filter(User.id == id).first()
+        if not usuario:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        
+        db.delete(usuario)
+        db.commit()
+        return JSONResponse(status_code=200, content={"message": "Usuario eliminado"})
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail={"message": "Error al eliminar usuario", "Excepción": str(e)})
+    finally:
+        db.close()
+
+
+
+
+
+
+
+
+
+
+
 
 #Endpoint Agregar Nuevos
 @app.post('/usuario/', response_model=modelusuario,tags=['Operaciones CRUD'])
@@ -103,20 +152,3 @@ def agregarUsuarios(usuario:modelusuario):
 
 
 
-@app.put('/usuarios/{id}', response_model=modelusuario, tags=['Operaciones CRUD'])
-def actualizarUsuarios(id: int, usuarioActualizado: modelusuario):
-    for index, usr in enumerate(usuarios):
-        if usr["id"] == id:
-            usuarios[index] = usuarioActualizado
-            return usuarios[index]
-    raise HTTPException(status_code=400, detail="El usuario no existe")
-
-
-#Endpoint Eliminar
-@app.delete('/usuarios/{id}', tags=['Operaciones CRUD'])
-def eliminarUsuarios(id:int):
-    for index, usr in enumerate(usuarios):
-        if usr["id"] == id:
-           del usuarios[index]
-           return {'detail':'Usuario eliminado'}
-    raise HTTPException(status_code=400, detail="El usuario no existe")
